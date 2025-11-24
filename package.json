@@ -23,13 +23,13 @@
 		"postcss-cli": "^11.0.1",
 		"postcss-csso": "^6.0.1",
 		"postcss-sort-media-queries": "^5.2.0",
-		"sass": "^1.94.0",
-		"stylelint": "^16.25.0",
+		"sass": "^1.94.2",
+		"stylelint": "^16.26.0",
 		"stylelint-config-rational-order": "^0.1.2",
 		"uglify-js": "^3.19.3"
 	},
 	"dependencies": {
-		"@fancyapps/ui": "^6.1.5",
+		"@fancyapps/ui": "^6.1.6",
 		"normalize.css": "^8.0.1",
 		"swiper": "^12.0.3"
 	}
