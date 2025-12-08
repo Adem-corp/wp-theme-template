@@ -8,8 +8,13 @@
 
 get_header();
 
-get_template_part( 'layouts/partials/blocks' );
+if ( post_password_required() ) {
+	echo get_the_password_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	return;
+} else {
+	get_template_part( 'layouts/partials/blocks' );
 
-the_content();
+	the_content();
+}
 
 get_footer();
