@@ -246,7 +246,7 @@ function adem_change_mail_email(): string {
  * 2. If typing speed data is empty and time on page < 5 seconds → flagged as bots.
  * 3. If typing intervals are too uniform (difference < 10 ms across > 5 keystrokes) → flagged as bots.
  *
- * @param int $time_on_page Time spent on the page in milliseconds.
+ * @param int    $time_on_page Time spent on the page in milliseconds.
  * @param string $typing_speed_json JSON-encoded array of typing intervals in milliseconds.
  *
  * @return bool True if the submission is considered suspicious (likely bot), false otherwise.
@@ -304,6 +304,39 @@ function is_suspicious_submission( $time_on_page, $typing_speed_json ) {
 
 		if ( count( $outliers ) <= 1 ) {
 			return true;
+		}
+
+		$small_threshold = 4;
+		$max_chain       = 0;
+		$current_chain   = 0;
+
+		foreach ( $typing_speed as $i => $t ) {
+			if ( $t <= $small_threshold ) {
+				++$current_chain;
+			} else {
+				$current_chain = 0;
+			}
+
+			$max_chain = max( $max_chain, $current_chain );
+		}
+
+		if ( $max_chain >= 3 ) {
+			return true;
+		}
+
+		$chain                 = 1;
+		$count_of_typing_speed = count( $typing_speed );
+
+		for ( $i = 1; $i < $count_of_typing_speed; $i++ ) {
+			if ( abs( $typing_speed[ $i ] - $typing_speed[ $i - 1 ] ) < 2 ) {
+				++$chain;
+			} else {
+				$chain = 1;
+			}
+
+			if ( $chain >= 4 ) {
+				return true;
+			}
 		}
 	}
 
