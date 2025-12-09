@@ -1,74 +1,61 @@
 'use strict';
 
-function slideUp(target, duration = 500) {
-	target.style.transitionProperty = 'height, margin, padding';
-	target.style.transitionDuration = duration + 'ms';
-	target.style.boxSizing = 'border-box';
-	target.style.height = target.offsetHeight + 'px';
+function slideUp(target, duration = 400) {
+	target.style.height = target.offsetHeight + "px";
+	target.style.boxSizing = "border-box";
+	target.style.overflow = "hidden";
+
 	target.offsetHeight;
 
 	requestAnimationFrame(() => {
-		target.style.overflow = 'hidden';
-		target.style.height = 0;
-		target.style.paddingTop = 0;
-		target.style.paddingBottom = 0;
-		target.style.marginTop = 0;
-		target.style.marginBottom = 0;
+		requestAnimationFrame(() => {
+			target.style.transition = `height ${duration}ms ease`;
+			target.style.height = 0;
+		});
 	});
 
-	window.setTimeout(() => {
-		target.style.display = 'none';
-		target.style.removeProperty('height');
-		target.style.removeProperty('padding-top');
-		target.style.removeProperty('padding-bottom');
-		target.style.removeProperty('margin-top');
-		target.style.removeProperty('margin-bottom');
-		target.style.removeProperty('overflow');
-		target.style.removeProperty('transition-duration');
-		target.style.removeProperty('transition-property');
+	setTimeout(() => {
+		target.style.display = "none";
+		target.style.removeProperty("height");
+		target.style.removeProperty("overflow");
+		target.style.removeProperty("transition");
 	}, duration);
 }
 
-function slideDown(target, duration = 500) {
-	target.style.removeProperty('display');
-	let display = window.getComputedStyle(target).display;
+function slideDown(target, duration = 400) {
+	target.style.removeProperty("display");
 
-	if (display === 'none') display = 'block';
+	let display = getComputedStyle(target).display;
+
+	if (display === "none") display = "block";
 
 	target.style.display = display;
+
 	let height = target.offsetHeight;
-	target.style.overflow = 'hidden';
+
 	target.style.height = 0;
-	target.style.paddingTop = 0;
-	target.style.paddingBottom = 0;
-	target.style.marginTop = 0;
-	target.style.marginBottom = 0;
+	target.style.overflow = "hidden";
 	target.offsetHeight;
-	target.style.boxSizing = 'border-box';
 
 	requestAnimationFrame(() => {
-		target.style.transitionProperty = "height, margin, padding";
-		target.style.transitionDuration = duration + 'ms';
-		target.style.height = height + 'px';
-		target.style.removeProperty('padding-top');
-		target.style.removeProperty('padding-bottom');
-		target.style.removeProperty('margin-top');
-		target.style.removeProperty('margin-bottom');
+		requestAnimationFrame(() => {
+			target.style.transition = `height ${duration}ms ease`;
+			target.style.height = height + "px";
+		});
 	});
 
-	window.setTimeout(() => {
-		target.style.removeProperty('height');
-		target.style.removeProperty('overflow');
-		target.style.removeProperty('transition-duration');
-		target.style.removeProperty('transition-property');
+	setTimeout(() => {
+		target.style.removeProperty("height");
+		target.style.removeProperty("overflow");
+		target.style.removeProperty("transition");
 	}, duration);
 }
 
 function slideToggle(target, duration = 500) {
 	if (window.getComputedStyle(target).display === 'none') {
-		return slideDown(target, duration);
+		slideDown(target, duration);
 	} else {
-		return slideUp(target, duration);
+		slideUp(target, duration);
 	}
 }
 
