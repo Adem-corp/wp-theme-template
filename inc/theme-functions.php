@@ -41,7 +41,7 @@ function adem_clear_tel( $tel ) {
  *
  * @return string Nonce field HTML markup.
  */
-function adem_wp_nonce_field( $action = - 1, $name = '_wpnonce', $referer = true, $display = true ): string {
+function adem_wp_nonce_field( $action = -1, $name = '_wpnonce', $referer = true, $display = true ): string {
 	$nonce_field = wp_nonce_field( $action, $name, $referer, false );
 	$nonce_field = str_replace( 'id="' . $name . '"', '', $nonce_field );
 
@@ -155,20 +155,24 @@ function adem_dynamic_thumbnail( $attachment_id, $width, $height, $crop = true, 
  * Sanitizes content with extended allowed HTML tags and optionally echoes it.
  *
  * This function extends the default set of allowed HTML tags from
- * `wp_kses_allowed_html( 'post' )` by adding support for `<iframe>` and `<svg>`
- * elements with specific attributes. The sanitized content can either be
- * returned or directly echoed depending on the `$display` parameter.
+ * `wp_kses_allowed_html( 'post' )` by adding support for additional HTML
+ * elements such as `<iframe>` and/or `<svg>` with specific allowed attributes.
+ * One or multiple tags can be enabled by passing a string or an array of tags.
  *
- * @param string $content The HTML content to sanitize.
- * @param string $tag The tag type to allow additionally (`iframe` or `svg`).
- * @param bool   $display Whether to echo the sanitized content. Default true.
+ * @param string          $content The HTML content to sanitize.
+ * @param string|string[] $tags Additional tag or list of tags to allow
+ *                                 (e.g. 'iframe', 'svg', or ['iframe', 'svg']).
+ * @param bool            $display Whether to echo the sanitized content.
+ *                                            Default true.
  *
  * @return string The sanitized HTML content.
  */
-function adem_wp_kses_post_more( $content, $tag, $display = true ) {
+function adem_wp_kses_post_more( $content, $tags, $display = true ) {
 	$allowed_tags = wp_kses_allowed_html( 'post' );
 
-	if ( 'iframe' === $tag ) {
+	$tags = (array) $tags;
+
+	if ( in_array( 'iframe', $tags, true ) ) {
 		$allowed_tags['iframe'] = array(
 			'src'             => true,
 			'width'           => true,
@@ -179,7 +183,9 @@ function adem_wp_kses_post_more( $content, $tag, $display = true ) {
 			'loading'         => true,
 			'referrerpolicy'  => true,
 		);
-	} elseif ( 'svg' === $tag ) {
+	}
+
+	if ( in_array( 'svg', $tags, true ) ) {
 		$allowed_tags['svg'] = array(
 			'width'  => true,
 			'height' => true,
@@ -187,6 +193,16 @@ function adem_wp_kses_post_more( $content, $tag, $display = true ) {
 		);
 		$allowed_tags['use'] = array(
 			'xlink:href' => true,
+		);
+	}
+
+	if ( in_array( 'input', $tags, true ) ) {
+		$allowed_tags['input'] = array(
+			'type'  => true,
+			'value' => true,
+			'min'   => true,
+			'max'   => true,
+			'class' => true,
 		);
 	}
 
