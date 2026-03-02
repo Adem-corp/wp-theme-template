@@ -11,7 +11,7 @@
 	"devDependencies": {
 		"@wordpress/browserslist-config": "^6.40.0",
 		"@wordpress/stylelint-config": "^23.32.0",
-		"autoprefixer": "^10.4.24",
+		"autoprefixer": "^10.4.27",
 		"browser-sync": "^3.0.4",
 		"chokidar-cli": "^3.0.0",
 		"gulp": "^5.0.1",
@@ -24,12 +24,12 @@
 		"postcss-csso": "^6.0.1",
 		"postcss-sort-media-queries": "^5.2.0",
 		"sass": "^1.97.3",
-		"stylelint": "^17.3.0",
+		"stylelint": "^17.4.0",
 		"stylelint-config-rational-order": "^0.1.2",
 		"uglify-js": "^3.19.3"
 	},
 	"dependencies": {
-		"@fancyapps/ui": "^6.1.11",
+		"@fancyapps/ui": "^6.1.12",
 		"normalize.css": "^8.0.1",
 		"swiper": "^12.1.2"
 	}
