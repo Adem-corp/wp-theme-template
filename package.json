@@ -9,8 +9,8 @@
 		"extends @wordpress/browserslist-config"
 	],
 	"devDependencies": {
-		"@wordpress/browserslist-config": "^6.48.0",
-		"@wordpress/stylelint-config": "^23.40.0",
+		"@wordpress/browserslist-config": "^6.48.1",
+		"@wordpress/stylelint-config": "^23.40.1",
 		"autoprefixer": "^10.5.0",
 		"browser-sync": "^3.0.4",
 		"chokidar-cli": "^3.0.0",
