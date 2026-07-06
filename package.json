@@ -9,8 +9,8 @@
 		"extends @wordpress/browserslist-config"
 	],
 	"devDependencies": {
-		"@wordpress/browserslist-config": "^6.49.0",
-		"@wordpress/stylelint-config": "^23.41.0",
+		"@wordpress/browserslist-config": "^6.50.0",
+		"@wordpress/stylelint-config": "^23.42.0",
 		"autoprefixer": "^10.5.2",
 		"browser-sync": "^3.0.4",
 		"chokidar-cli": "^3.0.0",
@@ -31,6 +31,6 @@
 	"dependencies": {
 		"@fancyapps/ui": "^6.1.14",
 		"normalize.css": "^8.0.1",
-		"swiper": "^14.0.0"
+		"swiper": "^14.0.1"
 	}
 }
