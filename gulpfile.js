@@ -17,7 +17,7 @@ function mainStyles() {
 			require('autoprefixer')(),
 			require('postcss-sort-media-queries')(),
 			require('postcss-csso')({
-				comments: 'first-exclamation'
+				comments: 'exclamation'
 			})
 		]))
 		.pipe(gulp.dest('./'))

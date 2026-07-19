@@ -27,7 +27,7 @@ add_action( 'acf/init', 'adem_acf_register_options_pages' );
  */
 function adem_acf_register_options_pages() {
 	if ( function_exists( 'acf_add_options_page' ) ) {
-		$theme_options = acf_add_options_page(
+		 acf_add_options_page(
 			array(
 				'page_title'      => 'Настройки темы',
 				'menu_title'      => 'Настройки темы',
@@ -41,38 +41,3 @@ function adem_acf_register_options_pages() {
 	}
 }
 
-// TODO времянка. ACFE 0.9.0.5: Fix compatibility with clone on ACF 6.3.2.
-add_action( 'acf/init', 'adem_acfe_fix_clone', 100 );
-function adem_acfe_fix_clone() {
-	$instance = acf_get_instance( 'acfe_field_clone' );
-	remove_action( 'wp_ajax_acf/fields/clone/query', array( $instance, 'ajax_query' ), 5 );
-}
-
-// TODO времянка ACFE 0.9.0.5: Fix compatibility with fields on ACF 6.3.2.
-add_action( 'acf/input/admin_print_footer_scripts', 'adem_acfe_fix_form_fields' );
-function adem_acfe_fix_form_fields() {
-	?>
-	<script>
-		(function($){
-
-			if(typeof acf === 'undefined' || typeof acfe === 'undefined'){
-				return;
-			}
-
-			new acf.Model({
-				filters: {
-					'select2_ajax_data/action=acfe/form/map_field_groups_ajax':      'ajaxData',
-					'select2_ajax_data/action=acfe/form/map_field_ajax':             'ajaxData',
-					'select2_ajax_data/action=acf/fields/acfe_taxonomy_terms/query': 'ajaxData',
-				},
-
-				ajaxData: function(ajaxData, data, $el, field, select){
-					ajaxData.nonce = acf.get('nonce');
-					return ajaxData;
-				},
-			});
-
-		})(jQuery);
-	</script>
-	<?php
-}
