@@ -23,15 +23,15 @@
 		"postcss-cli": "^11.0.1",
 		"postcss-csso": "^6.0.1",
 		"postcss-sort-media-queries": "^6.7.1",
-		"sass": "^1.102.0",
+		"sass": "^1.103.1",
 		"stylelint": "^17.14.1",
 		"stylelint-config-rational-order": "^0.1.2",
 		"uglify-js": "^3.19.3"
 	},
 	"dependencies": {
-		"@alpinejs/collapse": "^3.16.1",
+		"@alpinejs/collapse": "^3.16.2",
 		"@fancyapps/ui": "^6.1.14",
-		"alpinejs": "^3.16.1",
+		"alpinejs": "^3.16.2",
 		"mmenu-light": "^3.2.2",
 		"normalize.css": "^8.0.1",
 		"swiper": "^14.1.0"
