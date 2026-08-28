@@ -61,6 +61,9 @@ img {
 }
 
 button {
+	color: inherit;
+	font-size: inherit;
+	font-family: inherit;
 	cursor: pointer;
 
 	&:disabled {
@@ -99,6 +102,10 @@ object {
 
 address {
 	font-style: normal;
+}
+
+iframe {
+	border: none;
 }
 
 .hidden {
