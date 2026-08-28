@@ -160,10 +160,10 @@ function adem_dynamic_thumbnail( $attachment_id, $width, $height, $crop = true, 
  * One or multiple tags can be enabled by passing a string or an array of tags.
  *
  * @param string          $content The HTML content to sanitize.
- * @param string|string[] $tags Additional tag or list of tags to allow
+ * @param string|string[] $tags    Additional tag or list of tags to allow
  *                                 (e.g. 'iframe', 'svg', or ['iframe', 'svg']).
  * @param bool            $display Whether to echo the sanitized content.
- *                                            Default true.
+ *                                 Default true.
  *
  * @return string The sanitized HTML content.
  */
@@ -211,4 +211,22 @@ function adem_wp_kses_post_more( $content, $tags, $display = true ) {
 	}
 
 	return wp_kses( $content, $allowed_tags );
+}
+
+/**
+ * Get the versioned URL of the SVG icon sprite.
+ *
+ * Appends the sprite file's last modification time as a query
+ * parameter so browsers fetch a fresh copy whenever the sprite
+ * changes, while still caching it long-term between updates.
+ * Falls back to ADEM_THEME_VERSION if the file cannot be found.
+ *
+ * @return string Sprite URL with cache-busting version query arg.
+ */
+function adem_svg_sprite_url() {
+	$path = '/assets/images/sprite.svg';
+	$file = get_template_directory() . $path;
+	$ver  = file_exists( $file ) ? filemtime( $file ) : ADEM_THEME_VERSION;
+
+	return get_template_directory_uri() . $path . '?v=' . $ver;
 }
