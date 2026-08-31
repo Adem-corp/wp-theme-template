@@ -72,6 +72,32 @@ function adem_dynamic_thumbnail( $attachment_id, $width, $height, $crop = true, 
 		return '';
 	}
 
+	$mime_type = get_post_mime_type( $attachment_id );
+
+	if ( 'image/svg+xml' === $mime_type ) {
+		if ( $return_url ) {
+			return $url;
+		}
+
+		$default_attr = array(
+			'src'    => $url,
+			'alt'    => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ),
+			'width'  => $width,
+			'height' => $height,
+		);
+
+		$attr = wp_parse_args( $attr, $default_attr );
+		$attr = array_map( 'esc_attr', $attr );
+
+		$html = '<img';
+		foreach ( $attr as $name => $value ) {
+			$html .= " $name=" . '"' . $value . '"';
+		}
+		$html .= ' />';
+
+		return $html;
+	}
+
 	$img_path     = get_attached_file( $attachment_id );
 	$info         = pathinfo( $img_path );
 	$ext          = $info['extension'];
