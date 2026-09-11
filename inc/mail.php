@@ -140,10 +140,7 @@ function adem_send_mail() {
 		exit;
 	}
 
-	$time_on_page = isset( $_POST['time_on_page'] ) ? sanitize_text_field( wp_unslash( $_POST['time_on_page'] ) ) : 0;
-	$typing_speed = $_POST['typing_speed'] ?? '[]'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.NonceVerification.Missing.
-
-	if ( is_suspicious_submission( $time_on_page, $typing_speed ) ) {
+	if ( is_suspicious_submission() ) {
 		exit;
 	}
 
@@ -238,43 +235,36 @@ function adem_change_mail_email(): string {
 /**
  * Detects whether a form submission is likely to be from a bot.
  *
- * The function evaluates the time a user spent on the page and their typing speed pattern
- * to determine suspicious submissions. It also logs request details for further analysis.
- *
- * Rules applied:
- * 1. Submissions with time on page < 3 seconds are flagged as bots.
- * 2. If typing speed data is empty and time on page < 5 seconds → flagged as bots.
- * 3. If typing intervals are too uniform (difference < 10 ms across > 5 keystrokes) → flagged as bots.
- *
- * @param int    $time_on_page Time spent on the page in milliseconds.
- * @param string $typing_speed_json JSON-encoded array of typing intervals in milliseconds.
+ * Reads `time_on_page` and `typing_speed` directly from $_POST (nonce
+ * verification is expected to happen in the calling handler before this
+ * function runs) and scores the submission based on several heuristics:
+ * elapsed time on page, missing typing data, and typing rhythm uniformity
+ * (range, coefficient of variation, outlier count, repeated-interval chains).
+ * Every evaluated submission is logged to antibot.log for later calibration
+ * of the scoring thresholds, regardless of the outcome.
  *
  * @return bool True if the submission is considered suspicious (likely bot), false otherwise.
  */
-function is_suspicious_submission( $time_on_page, $typing_speed_json ) {
-	$log      = array(
-		'ip'           => $_SERVER['REMOTE_ADDR'] ?? null, // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.NonceVerification.Missing.
-		'time'         => current_time( 'mysql' ),
-		'time_on_page' => $time_on_page,
-		'typing_speed' => $typing_speed_json,
-		'post'         => $_POST, //phpcs:ignore WordPress.Security.NonceVerification.Missing
-	);
-	$log_line = wp_json_encode( $log, JSON_UNESCAPED_UNICODE ) . PHP_EOL;
+function is_suspicious_submission() {
+	$time_on_page      = isset( $_POST['time_on_page'] ) ? intval( wp_unslash( $_POST['time_on_page'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	$typing_speed_json = isset( $_POST['typing_speed'] ) ? wp_unslash( $_POST['typing_speed'] ) : '[]'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing
 
-	error_log( $log_line, 3, WP_CONTENT_DIR . '/antibot.log' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-
-	$time_on_page = intval( $time_on_page );
 	$typing_speed = json_decode( $typing_speed_json, true );
 
-	if ( $time_on_page < 3000 ) {
-		return true;
+	if ( ! is_array( $typing_speed ) ) {
+		$typing_speed = array();
 	}
 
-	if ( empty( $typing_speed ) && $time_on_page < 5000 ) {
-		return true;
-	}
+	$score = 0;
 
-	if ( ! empty( $typing_speed ) && count( $typing_speed ) > 5 ) {
+	if ( $time_on_page < 2000 ) {
+		// Достатньо саме собою, але через $score, щоб логування не пропускалось.
+		$score = 10;
+	} elseif ( empty( $typing_speed ) ) {
+		if ( $time_on_page < 4000 ) {
+			$score += 2;
+		}
+	} elseif ( count( $typing_speed ) > 5 ) {
 		$min      = min( $typing_speed );
 		$max      = max( $typing_speed );
 		$avg      = array_sum( $typing_speed ) / count( $typing_speed );
@@ -287,12 +277,12 @@ function is_suspicious_submission( $time_on_page, $typing_speed_json ) {
 		$std_dev  = sqrt( $variance / count( $typing_speed ) );
 		$coef_var = $std_dev / ( $avg ?: 1 );
 
-		if ( ( $max - $min ) < 16 ) {
-			return true;
+		if ( ( $max - $min ) < 8 ) {
+			$score += 2;
 		}
 
-		if ( $coef_var < 0.1 ) {
-			return true;
+		if ( $coef_var < 0.05 ) {
+			$score += 2;
 		}
 
 		$outliers = array_filter(
@@ -302,15 +292,15 @@ function is_suspicious_submission( $time_on_page, $typing_speed_json ) {
 			}
 		);
 
-		if ( count( $outliers ) <= 1 ) {
-			return true;
+		if ( count( $outliers ) === 0 ) {
+			++$score;
 		}
 
 		$small_threshold = 4;
 		$max_chain       = 0;
 		$current_chain   = 0;
 
-		foreach ( $typing_speed as $i => $t ) {
+		foreach ( $typing_speed as $t ) {
 			if ( $t <= $small_threshold ) {
 				++$current_chain;
 			} else {
@@ -320,8 +310,8 @@ function is_suspicious_submission( $time_on_page, $typing_speed_json ) {
 			$max_chain = max( $max_chain, $current_chain );
 		}
 
-		if ( $max_chain >= 3 ) {
-			return true;
+		if ( $max_chain >= 4 ) {
+			$score += 3;
 		}
 
 		$chain                 = 1;
@@ -334,11 +324,23 @@ function is_suspicious_submission( $time_on_page, $typing_speed_json ) {
 				$chain = 1;
 			}
 
-			if ( $chain >= 4 ) {
-				return true;
+			if ( $chain >= 5 ) {
+				$score += 3;
+				break;
 			}
 		}
 	}
 
-	return false;
+	$log = array(
+		'ip'           => $_SERVER['REMOTE_ADDR'] ?? null, // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.NonceVerification.Missing.
+		'date'         => current_time( 'mysql' ),
+		'score'        => $score,
+		'time_on_page' => $time_on_page,
+		'typing_speed' => $typing_speed_json,
+		'post'         => $_POST, // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	);
+
+	error_log( wp_json_encode( $log, JSON_UNESCAPED_UNICODE ) . PHP_EOL, 3, WP_CONTENT_DIR . '/antibot.log' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+	return $score >= 4;
 }
