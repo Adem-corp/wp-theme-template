@@ -11,7 +11,7 @@
 	"devDependencies": {
 		"@wordpress/browserslist-config": "^6.55.0",
 		"@wordpress/stylelint-config": "^25.0.0",
-		"autoprefixer": "^10.6.0",
+		"autoprefixer": "^10.6.1",
 		"browser-sync": "^3.0.4",
 		"chokidar-cli": "^3.0.0",
 		"gulp": "^5.0.1",
@@ -29,9 +29,9 @@
 		"uglify-js": "^3.19.3"
 	},
 	"dependencies": {
-		"@alpinejs/collapse": "^3.17.2",
+		"@alpinejs/collapse": "^3.17.4",
 		"@fancyapps/ui": "^6.1.15",
-		"alpinejs": "^3.17.2",
+		"alpinejs": "^3.17.4",
 		"mmenu-light": "^3.2.2",
 		"normalize.css": "^8.0.1",
 		"swiper": "^14.2.0"
