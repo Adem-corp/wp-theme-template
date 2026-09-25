@@ -9,9 +9,9 @@
 		"extends @wordpress/browserslist-config"
 	],
 	"devDependencies": {
-		"@wordpress/browserslist-config": "^6.54.0",
-		"@wordpress/stylelint-config": "^24.3.0",
-		"autoprefixer": "^10.5.5",
+		"@wordpress/browserslist-config": "^6.55.0",
+		"@wordpress/stylelint-config": "^25.0.0",
+		"autoprefixer": "^10.6.1",
 		"browser-sync": "^3.0.4",
 		"chokidar-cli": "^3.0.0",
 		"gulp": "^5.0.1",
@@ -23,15 +23,15 @@
 		"postcss-cli": "^12.0.0",
 		"postcss-csso": "^6.0.1",
 		"postcss-sort-media-queries": "^6.7.1",
-		"sass": "^1.104.0",
+		"sass": "^1.104.1",
 		"stylelint": "^17.15.0",
 		"stylelint-config-rational-order": "^0.1.2",
 		"uglify-js": "^3.19.3"
 	},
 	"dependencies": {
-		"@alpinejs/collapse": "^3.17.1",
-		"@fancyapps/ui": "^6.1.14",
-		"alpinejs": "^3.17.1",
+		"@alpinejs/collapse": "^3.17.4",
+		"@fancyapps/ui": "^6.1.15",
+		"alpinejs": "^3.17.4",
 		"mmenu-light": "^3.2.2",
 		"normalize.css": "^8.0.1",
 		"swiper": "^14.2.0"
