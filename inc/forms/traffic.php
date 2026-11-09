@@ -42,7 +42,7 @@ add_action( 'init', 'adem_set_user_traffic_cookies' );
  */
 function adem_set_user_traffic_cookies() {
 	// Skip admin, AJAX, cron and REST requests entirely.
-	if ( is_admin() || wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+	if ( is_admin() || wp_doing_ajax() || wp_doing_cron() || adem_is_rest_request() ) {
 		return;
 	}
 
@@ -64,8 +64,10 @@ function adem_set_user_traffic_cookies() {
 		'content'  => null,
 	);
 
-	if ( isset( $_GET['utm_medium'] ) ) {
-		$source_array['medium']   = sanitize_text_field( wp_unslash( $_GET['utm_medium'] ) );
+	// Public attribution parameters cannot carry a form nonce.
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( isset( $_GET['utm_medium'] ) || isset( $_GET['utm_source'] ) ) {
+		$source_array['medium']   = isset( $_GET['utm_medium'] ) && is_string( $_GET['utm_medium'] ) ? sanitize_text_field( wp_unslash( $_GET['utm_medium'] ) ) : 'campaign';
 		$source_array['source']   = isset( $_GET['utm_source'] ) ? sanitize_text_field( wp_unslash( $_GET['utm_source'] ) ) : null;
 		$source_array['campaign'] = isset( $_GET['utm_campaign'] ) ? sanitize_text_field( wp_unslash( $_GET['utm_campaign'] ) ) : null;
 		$source_array['term']     = isset( $_GET['utm_term'] ) ? sanitize_text_field( wp_unslash( $_GET['utm_term'] ) ) : null;
@@ -75,7 +77,7 @@ function adem_set_user_traffic_cookies() {
 		$referrer     = wp_parse_url( $referrer_url, PHP_URL_HOST );
 		$host         = wp_parse_url( home_url(), PHP_URL_HOST );
 
-		if ( $referrer && $host !== $referrer ) {
+		if ( $referrer && strtolower( $host ) !== strtolower( $referrer ) ) {
 			$source_array['source'] = $referrer;
 			$source_array['medium'] = 'referral';
 
@@ -94,6 +96,7 @@ function adem_set_user_traffic_cookies() {
 		$source_array['source'] = 'none';
 		$source_array['medium'] = 'direct';
 	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	if ( headers_sent() ) {
 		return;
@@ -107,4 +110,33 @@ function adem_set_user_traffic_cookies() {
 	$traffic_summary .= ! empty( $source_array['content'] ) ? ", Ключевое слово - {$source_array['content']}" : '';
 
 	setcookie( 'traffic_source', $traffic_summary, time() + MONTH_IN_SECONDS, '/' );
+	$_COOKIE['source_cookie']  = wp_json_encode( $source_array );
+	$_COOKIE['traffic_source'] = $traffic_summary;
+}
+
+/** REST_REQUEST is defined after init, so also inspect the incoming URL. */
+function adem_is_rest_request() {
+	// REST route detection happens before the request has a nonce.
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		return true;
+	}
+	if ( isset( $_GET['rest_route'] ) ) {
+		return true;
+	}
+	if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+		return false;
+	}
+	$path      = wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
+	$rest_path = wp_parse_url( rest_url(), PHP_URL_PATH );
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	return $path && $rest_path && 0 === strpos( $path, rtrim( $rest_path, '/' ) . '/' );
+}
+
+/** Return the first recorded source for a saved lead and optional email. */
+function adem_get_traffic_summary() {
+	if ( empty( $_COOKIE['traffic_source'] ) || ! is_string( $_COOKIE['traffic_source'] ) ) {
+		return '';
+	}
+	return sanitize_text_field( wp_unslash( $_COOKIE['traffic_source'] ) );
 }

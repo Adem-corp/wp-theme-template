@@ -46,7 +46,7 @@ function adem_wp_nonce_field( $action = -1, $name = '_wpnonce', $referer = true,
 	$nonce_field = str_replace( 'id="' . $name . '"', '', $nonce_field );
 
 	if ( $display ) {
-		echo $nonce_field;
+		echo $nonce_field; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_nonce_field() returns trusted markup.
 	}
 
 	return $nonce_field;

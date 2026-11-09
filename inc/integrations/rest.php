@@ -17,9 +17,7 @@ remove_action( 'xmlrpc_rsd_apis', 'rest_output_rsd', 10 );
  * @return array List of allowed REST namespaces.
  */
 function adem_get_allowed_rest_namespaces() {
-	return array(
-		'/file-monitor/v1',
-	);
+	return (array) apply_filters( 'adem_allowed_rest_namespaces', array() );
 }
 
 add_filter( 'rest_endpoints', 'adem_clear_rest_endpoints' );
@@ -44,6 +42,7 @@ function adem_clear_rest_endpoints( $endpoints ) {
 	$allowed            = array();
 
 	foreach ( $allowed_namespaces as $ns ) {
+		$ns = '/' . trim( (string) $ns, '/' );
 		foreach ( $endpoints as $route => $details ) {
 			if ( 0 === strpos( $route, $ns . '/' ) || $route === $ns ) {
 				$allowed[ $route ] = $details;
@@ -84,7 +83,7 @@ function adem_restrict_rest_access( $result ) {
 		$rest_url = wp_parse_url( rest_url(), PHP_URL_PATH );
 		$request  = wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH );
 
-		if ( 0 === strpos( $request, $rest_url ) ) {
+		if ( $request && $rest_url && ( rtrim( $rest_url, '/' ) === $request || 0 === strpos( $request, rtrim( $rest_url, '/' ) . '/' ) ) ) {
 			$route = substr( $request, strlen( $rest_url ) );
 		}
 	}
@@ -95,7 +94,9 @@ function adem_restrict_rest_access( $result ) {
 
 	$allowed_namespaces = adem_get_allowed_rest_namespaces();
 
+	$route = '/' . trim( (string) $route, '/' );
 	foreach ( $allowed_namespaces as $ns ) {
+		$ns = '/' . trim( (string) $ns, '/' );
 		if ( 0 === strpos( $route, $ns . '/' ) || $route === $ns ) {
 			return $result;
 		}

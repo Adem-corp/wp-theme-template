@@ -114,69 +114,58 @@ function setTelMask() {
 
 function sendForms() {
 	const startTime = Date.now();
-	let typingSpeed = [];
-
-	document.querySelectorAll("input, textarea").forEach((field) => {
-		let lastTime = null;
-		field.addEventListener("input", () => {
-			const now = Date.now();
-			if (lastTime) {
-				typingSpeed.push(now - lastTime);
-			}
-			lastTime = now;
-		});
-	});
 
 	document.querySelectorAll('form.js-form').forEach(function (form) {
-		form.addEventListener('submit', function (e) {
+		const typingSpeed = [];
+		form.querySelectorAll('input, textarea').forEach((field) => {
+			let lastTime = null;
+			field.addEventListener('input', () => {
+				const now = Date.now();
+				if (lastTime) typingSpeed.push(now - lastTime);
+				lastTime = now;
+			});
+		});
+		form.addEventListener('submit', async function (e) {
 			e.preventDefault();
 
-			let formData = new FormData(form);
+			const formData = new FormData(form);
 			const formName = form.getAttribute('name');
-			const submitBtm = form.querySelector('button[type=submit]');
-			const submitBtnText = submitBtm.innerHTML;
-
-			if (formName) {
-				formData.append('form_name', formName);
-				formData.append('time_on_page', Date.now() - startTime);
-				formData.append('typing_speed', JSON.stringify(typingSpeed));
-				formData.append('action', 'send_mail');
-				submitBtm.innerHTML = 'Отправляю...'
-			} else {
-				return;
-			}
+			const submitBtn = form.querySelector('[type=submit]');
+			if (!formName || !submitBtn) return;
+			const submitBtnText = submitBtn.innerHTML;
+			formData.set('form_name', formName);
+			formData.set('time_on_page', Date.now() - startTime);
+			formData.set('typing_speed', JSON.stringify(typingSpeed));
+			formData.set('action', 'send_mail');
+			submitBtn.disabled = true;
+			submitBtn.innerHTML = 'Отправляю...';
 
 			form.classList.add('loading');
-
-			const response = fetch(adem_ajax.url, {
-				method: 'POST',
-				body: formData
-			})
-				.then(response => response.text())
-				.then(data => {
+			try {
+				const response = await fetch(adem_ajax.url, { method: 'POST', body: formData });
+				const result = await response.json();
+				if (!response.ok || !result.success) {
+					throw new Error(result.data?.message || 'Не удалось отправить форму.');
+				}
+				form.reset();
+				form.dispatchEvent(new CustomEvent('adem:form-success', { bubbles: true, detail: result.data }));
+				if (typeof Fancybox !== 'undefined' && document.querySelector('#modal-success')) {
 					Fancybox.close(true);
-					form.reset();
-					form.classList.remove('loading');
-					submitBtm.innerHTML = submitBtnText;
-
-					//if (typeof (ym) === "function") ym(metrika_number, 'reachGoal', 'metrika_ID'); // TODO отправка целей в метрику. Удалить, если не используется.
-
-					setTimeout(function () {
-						Fancybox.show([{
-							src: '#modal-success',
-							type: 'inline'
-						}]);
-					}, 100);
-				})
-				.catch((error) => {
-					console.error('Error:', error);
-				});
+					Fancybox.show([{ src: '#modal-success', type: 'inline' }]);
+				}
+			} catch (error) {
+				form.dispatchEvent(new CustomEvent('adem:form-error', { bubbles: true, detail: error }));
+			} finally {
+				form.classList.remove('loading');
+				submitBtn.disabled = false;
+				submitBtn.innerHTML = submitBtnText;
+			}
 		});
 	});
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-	Fancybox.bind();
+	if (typeof Fancybox !== 'undefined') Fancybox.bind();
 
 	setTelMask();
 	sendForms();

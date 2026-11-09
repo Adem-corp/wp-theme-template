@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="Starter Theme">
+	<description>WordPress coding standards for production theme PHP.</description>
+	<rule ref="WordPress"/>
+	<file>.</file>
+	<arg name="extensions" value="php"/>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+</ruleset>

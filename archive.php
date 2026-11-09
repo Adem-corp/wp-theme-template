@@ -28,17 +28,19 @@ $term_object = get_queried_object();
 
 <?php else : ?>
 
-	<p>no posts</p>
+	<div class="archive-empty">Записей нет.</div>
 
 <?php endif; ?>
 
 <?php
-get_template_part(
-	'layouts/partials/blocks',
-	null,
-	array(
-		'id' => 'category_' . $term_object->term_id,
-	)
-);
+if ( is_category() && $term_object instanceof WP_Term ) {
+	get_template_part(
+		'layouts/partials/blocks',
+		null,
+		array(
+			'id' => 'category_' . $term_object->term_id,
+		)
+	);
+}
 
 get_footer();

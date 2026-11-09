@@ -18,7 +18,10 @@ add_filter( 'acfe/flexible/thumbnail', 'adem_layout_thumbnail_url', 10, 3 );
  * @param array      $layout     Layout settings.
  */
 function adem_layout_thumbnail_url( $thumbnail, $field, $layout ) {
-	return get_template_directory_uri() . '/layouts/blocks/' . $layout['name'] . '/preview.jpg';
+	$name = isset( $layout['name'] ) ? sanitize_file_name( $layout['name'] ) : '';
+	$path = '/layouts/blocks/' . $name . '/preview.jpg';
+	return $name && file_exists( get_template_directory() . $path )
+		? get_template_directory_uri() . $path : $thumbnail;
 }
 
 add_action( 'acf/init', 'adem_acf_register_options_pages' );
@@ -27,7 +30,7 @@ add_action( 'acf/init', 'adem_acf_register_options_pages' );
  */
 function adem_acf_register_options_pages() {
 	if ( function_exists( 'acf_add_options_page' ) ) {
-		 acf_add_options_page(
+		acf_add_options_page(
 			array(
 				'page_title'      => 'Настройки темы',
 				'menu_title'      => 'Настройки темы',
@@ -40,4 +43,3 @@ function adem_acf_register_options_pages() {
 		);
 	}
 }
-

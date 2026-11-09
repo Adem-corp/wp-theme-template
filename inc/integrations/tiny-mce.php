@@ -6,13 +6,13 @@
  * @since 1.0.0
  */
 
-add_filter( 'tiny_mce_before_init', 'tmce_change_toolbar' );
+add_filter( 'tiny_mce_before_init', 'adem_tmce_change_toolbar' );
 /**
  * Add custom style formats in toolbar.
  *
  * @param array $args An array with TinyMCE config.
  */
-function tmce_change_toolbar( $args ) {
+function adem_tmce_change_toolbar( $args ) {
 	$style_formats            = array(
 		array(
 			'title' => 'Стиль текста',
@@ -49,7 +49,6 @@ function tmce_change_toolbar( $args ) {
 		),
 	);
 	$args['fontsize_formats'] = '6px 8px 10px 12px 14px 16px 18px 20px 22px 24px 26px 28px 30px 32px 34px 36px';
-	$args['font_formats']     = 'Manrope=Manrope,sans-serif;Furore=Furore,sans-serif'; // TODO заменить на шрифты используемые в теме
 	$args['style_formats']    = wp_json_encode( $style_formats );
 
 	return $args;

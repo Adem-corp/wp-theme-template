@@ -8,25 +8,20 @@
 
 $acf_post_id = $args['id'] ?? false;
 
-if ( have_rows( 'blocks', $acf_post_id ) ) {
-	$counters = array();
-
+if ( function_exists( 'have_rows' ) && have_rows( 'blocks', $acf_post_id ) ) {
 	while ( have_rows( 'blocks', $acf_post_id ) ) {
 		the_row();
 
-		$layout = get_row_layout();
-
-		if ( ! isset( $counters[ $layout ] ) ) {
-			$counters[ $layout ] = 1;
-		} else {
-			++$counters[ $layout ];
+		$layout = sanitize_file_name( get_row_layout() );
+		if ( ! $layout || ! file_exists( get_template_directory() . '/layouts/blocks/' . $layout . '/template.php' ) ) {
+			continue;
 		}
 
 		get_template_part(
 			'layouts/blocks/' . $layout . '/template',
 			null,
 			array(
-				'block_id' => $counters[ $layout ],
+				'block_id' => wp_unique_id( 'adem-' . $layout . '-' ),
 			)
 		);
 	}

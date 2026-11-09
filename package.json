@@ -2,7 +2,10 @@
 	"name": "Theme_name",
 	"version": "1.0.0",
 	"repository": "github:Danil-Klimov/Theme_name.git",
-	"scripts": {},
+	"scripts": {
+		"build": "gulp build",
+		"dev": "gulp"
+	},
 	"author": "Danil Klimov <doink3690@gmail.com>",
 	"license": "ISC",
 	"browserslist": [
