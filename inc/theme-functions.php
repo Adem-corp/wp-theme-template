@@ -240,19 +240,25 @@ function adem_wp_kses_post_more( $content, $tags, $display = true ) {
 }
 
 /**
- * Get the versioned URL of the SVG icon sprite.
+ * Returns the versioned SVG sprite URL for the given symbol.
  *
- * Appends the sprite file's last modification time as a query
- * parameter so browsers fetch a fresh copy whenever the sprite
- * changes, while still caching it long-term between updates.
- * Falls back to ADEM_THEME_VERSION if the file cannot be found.
- *
- * @return string Sprite URL with cache-busting version query arg.
+ * @param string $sprite SVG symbol ID, including the "i-" prefix.
+ * @return string Sprite URL with a version query and symbol fragment, or an empty string if no symbol is provided.
  */
-function adem_svg_sprite_url() {
-	$path = '/assets/images/sprite.svg';
-	$file = get_template_directory() . $path;
-	$ver  = file_exists( $file ) ? filemtime( $file ) : ADEM_THEME_VERSION;
+function adem_svg_sprite_url( string $sprite ): string {
+	static $url = null;
 
-	return get_template_directory_uri() . $path . '?v=' . $ver;
+	if ( ! $sprite ) {
+		return '';
+	}
+
+	if ( null === $url ) {
+		$path = '/assets/images/sprite.svg';
+		$file = get_template_directory() . $path;
+		$ver  = file_exists( $file ) ? filemtime( $file ) : ADEM_THEME_VERSION;
+
+		$url = get_template_directory_uri() . $path . '?v=' . $ver;
+	}
+
+	return $url . '#' . $sprite;
 }
