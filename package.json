@@ -22,11 +22,11 @@
 		"gulp-rename": "^2.1.0",
 		"gulp-sass": "^6.0.1",
 		"gulp-uglify": "^3.0.2",
-		"postcss": "^8.5.32",
+		"postcss": "^8.5.33",
 		"postcss-cli": "^12.0.0",
 		"postcss-csso": "^6.0.1",
 		"postcss-sort-media-queries": "^6.7.1",
-		"sass": "^1.108.1",
+		"sass": "^1.108.2",
 		"stylelint": "^18.0.0",
 		"stylelint-config-rational-order": "^0.1.2",
 		"uglify-js": "^3.19.3"
